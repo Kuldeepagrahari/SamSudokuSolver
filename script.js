@@ -13,7 +13,7 @@ board.addEventListener("keyup", (event) => {
     }
     else {
         tdEl.innerText = tdVal;
-        tdEl.style.backgroundColor="rgb(100, 6, 241)"
+        tdEl.style.backgroundColor="rgb(22, 22, 22)"
         tdEl.style.color="white"
         
     }
