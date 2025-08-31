@@ -3,149 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SamSudokuSolver</title>
-    <!-- <link rel="stylesheet" href="style2.css"> -->
+    <title>Sudoku Cosmos Solver</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #363738, #18181a);
-            color: white;
-            text-align: center;
-            font-family: "Play", sans-serif;
-        }
-        nav {
-            background-color: rgba(26, 23, 23, 0.8);
-            height:10px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .brand h1 {
-            color: #0a0a0a;
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .container {
-            margin-top: 0px;
-        }
-        .box {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 20px;
-            border-radius: 10px;
-            display: inline-block;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-        }
-        table {
-            border-collapse: collapse;
-            margin: auto;
-            border: 2px solid white;
-        }
-        td {
-            width: 45px;
-            height: 45px;
-            text-align: center;
-            font-size: 20px;
-            border: 1px solid white;
-            background-color: rgba(255, 255, 255, 0.2);
-            transition: background-color 0.3s ease;
-        }
-        td:focus {
-            background-color: rgba(12, 12, 12, 0.5);
-            outline: none;
-        }
-        .buttons {
-            margin-top: 20px;
-        }
-        button {
-            background-color: #ffcc00;
-            border: none;
-            padding: 12px 24px;
-            margin: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        button:hover {
-            background-color: #e6b800;
-            transform: scale(1.05);
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <h1>Sudoku Solver</h1>
-        <div class="brand"><i>by</i><h1>Sam</h1></div>
-    </nav>
-    <main>
-        <div class="container">
-            <h2>Solve your puzzle with a click</h2>
-            <div class="box">
-                <table id="board">
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                        <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
-                    </tr>
+    <header class="main-header">
+        <h1>SUDOKU <span class="highlight">SOLVER</span></h1>
+    </header>
+
+    <main class="container">
+        <div class="box">
+            <table id="board">
                 </table>
-                <div class="buttons">
-                    <button id="solve">Solve</button>
-                    <button id="reset">Reset</button>
-                </div>
-            </div>
         </div>
+
+        <div class="action-buttons">
+            <button id="validate-btn">Validate Initial Board</button>
+            <button id="solve-btn" disabled>Solve</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+        <p class="message-area" id="message-area">Enter your puzzle numbers in the grid.</p>
     </main>
+    
+    <script src="script.js"></script>
+    
+    <script>
+        document.body.addEventListener('mousemove', (e) => {
+            document.body.style.setProperty('--x', e.clientX + 'px');
+            document.body.style.setProperty('--y', e.clientY + 'px');
+        });
+    </script>
 </body>
-<script type="module" src="script.js"></script>
 </html>

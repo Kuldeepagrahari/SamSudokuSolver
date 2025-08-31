@@ -1,86 +1,234 @@
-import Solution from "./soduku.js";
+// --- 0. The Core Solver Class (Integrated) ---
+// This class contains the backtracking algorithm to solve the Sudoku.
+class Solution {
+    solutionStr(boardString) {
+        const board = [];
+        for (let i = 0; i < 9; i++) {
+            board.push(boardString.substring(i * 9, (i + 1) * 9).split(''));
+        }
 
-const board = document.getElementById("board");
+        this.solveSudoku(board);
 
-board.addEventListener("keyup", (event) => {
-    const tdEl = event.target;
-    const tdVal = tdEl.innerText.trim();
-    if (!/^[1-9]$/.test(tdVal)) {
-        tdEl.innerText = "";
-        tdEl.style.backgroundColor = "white";
-        tdEl.style.color = "black";
-    } else {
-        tdEl.innerText = tdVal;
-        tdEl.style.backgroundColor = "rgb(22, 22, 22)";
-        tdEl.style.color = "white";
+        return board.map(row => row.join('')).join('');
     }
-});
 
-function boardToString() {
-    const tdata = document.getElementsByTagName("td");
-    let TabEntries = "";
-
-    for (let i = 0; i < tdata.length; i++) {
-        TabEntries += /^[1-9]$/.test(tdata[i].innerText) ? tdata[i].innerText : ".";
+    solveSudoku(board) {
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (board[i][j] === '.') {
+                    for (let c = 1; c <= 9; c++) {
+                        const char = c.toString();
+                        if (this.isValid(board, i, j, char)) {
+                            board[i][j] = char;
+                            if (this.solveSudoku(board)) {
+                                return true;
+                            } else {
+                                board[i][j] = '.'; // Backtrack
+                            }
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true; // Board is solved
     }
-    return TabEntries;
+
+    isValid(board, row, col, c) {
+        for (let i = 0; i < 9; i++) {
+            if (board[i][col] === c) return false;
+            if (board[row][i] === c) return false;
+            const boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
+            const boxCol = 3 * Math.floor(col / 3) + i % 3;
+            if (board[boxRow][boxCol] === c) return false;
+        }
+        return true;
+    }
 }
 
-function clearer() {
-    const tdata = document.getElementsByTagName("td");
-    for (let i = 0; i < tdata.length; i++) {
-        tdata[i].innerText = "";
-        tdata[i].style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-        tdata[i].style.color = "white";
-    }
-    // board.style.backgroundColor = "white";
-}
 
-function stringToBoard(boardString) {
-    const tdata = document.getElementsByTagName("td");
-    for (let i = 0; i < boardString.length; i++) {
-        tdata[i].innerText = boardString[i] !== '.' ? boardString[i] : '';
-    }
-}
+// --- 1. DOM Elements & State ---
+const boardElement = document.getElementById("board");
+const solveBtn = document.getElementById("solve-btn");
+const validateBtn = document.getElementById("validate-btn");
+const resetBtn = document.getElementById("reset-btn");
+const messageArea = document.getElementById("message-area");
 
-function isValidBoard(boardString) {
+let board = []; // 2D array representation
+let isSolving = false;
+const sudokuSolver = new Solution();
+
+// --- 2. Board Initialization & Input Handling ---
+
+function renderBlankBoard() {
+    board = Array(9).fill().map(() => Array(9).fill(0));
+    boardElement.innerHTML = '';
     for (let i = 0; i < 9; i++) {
-        let row = new Set(), col = new Set(), box = new Set();
+        const rowEl = document.createElement('tr');
         for (let j = 0; j < 9; j++) {
-            let rowVal = boardString[i * 9 + j],
-                colVal = boardString[j * 9 + i],
-                boxVal = boardString[Math.floor(i / 3) * 27 + (i % 3) * 3 + Math.floor(j / 3) * 9 + (j % 3)];
-            
-            if (rowVal !== '.' && row.has(rowVal)) return false;
-            if (colVal !== '.' && col.has(colVal)) return false;
-            if (boxVal !== '.' && box.has(boxVal)) return false;
-            
-            row.add(rowVal);
-            col.add(colVal);
-            box.add(boxVal);
+            const cellEl = document.createElement('td');
+            cellEl.contentEditable = true;
+            cellEl.addEventListener('input', (e) => handleInput(e, i, j));
+            rowEl.appendChild(cellEl);
+        }
+        boardElement.appendChild(rowEl);
+    }
+    solveBtn.disabled = true;
+    validateBtn.disabled = false;
+    messageArea.textContent = "Enter your puzzle numbers in the grid.";
+    messageArea.style.color = "#fff";
+}
+
+function handleInput(e, row, col) {
+    const tdEl = e.target;
+    const tdVal = tdEl.textContent.trim();
+    
+    solveBtn.disabled = true;
+    validateBtn.disabled = false;
+    messageArea.textContent = "Board changed. Please validate before solving.";
+    messageArea.style.color = "#fff";
+    
+    if (!/^[1-9]$/.test(tdVal)) {
+        tdEl.textContent = "";
+        board[row][col] = 0;
+    } else {
+        // Enforce single character in cell
+        tdEl.textContent = tdVal[0];
+        board[row][col] = parseInt(tdVal[0], 10);
+    }
+}
+
+// --- 3. Validation Logic ---
+
+function validateInitialBoard() {
+    const tempBoard = board.map(row => [...row]);
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            const num = tempBoard[i][j];
+            if (num !== 0) {
+                tempBoard[i][j] = 0; 
+                if (!isValidPlacement(tempBoard, i, j, num)) {
+                    messageArea.textContent = "Invalid initial board setup. Check for duplicates.";
+                    messageArea.style.color = "var(--error-color)";
+                    solveBtn.disabled = true;
+                    tempBoard[i][j] = num; 
+                    return false;
+                }
+                tempBoard[i][j] = num;
+            }
+        }
+    }
+    
+    messageArea.textContent = "Initial board is valid! Ready to solve.";
+    messageArea.style.color = "var(--valid-glow)";
+    solveBtn.disabled = false;
+    validateBtn.disabled = true;
+    return true;
+}
+
+function isValidPlacement(grid, row, col, num) {
+    for (let i = 0; i < 9; i++) {
+        if (grid[row][i] === num || grid[i][col] === num) return false;
+    }
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (grid[startRow + i][startCol + j] === num) return false;
         }
     }
     return true;
 }
 
-const solvebtn = document.querySelector("#solve");
-const resetbtn = document.getElementById("reset");
-const sudokuSolver = new Solution();
+// --- 4. Visual Solver ---
 
-solvebtn.addEventListener("click", () => {
-    const boardString = boardToString();
-    if (!isValidBoard(boardString)) {
-        alert("Invalid Sudoku entries! Please correct the board.");
-        board.style.backgroundColor = "red";
-        return;
+async function visualizeSolve() {
+    if (isSolving) return;
+    if (!validateInitialBoard()) return;
+
+    isSolving = true;
+    setButtonsDisabled(true);
+    messageArea.textContent = "Solving...";
+    messageArea.style.color = "var(--solving-color)";
+    lockBoard(); 
+
+    const tempBoard = board.map(row => [...row]);
+    
+    async function solveStep(row, col) {
+        if (row === 9) return true;
+
+        const nextRow = col === 8 ? row + 1 : row;
+        const nextCol = col === 8 ? 0 : col + 1;
+
+        if (tempBoard[row][col] !== 0) {
+            return await solveStep(nextRow, nextCol);
+        }
+
+        for (let num = 1; num <= 9; num++) {
+            if (isValidPlacement(tempBoard, row, col, num)) {
+                tempBoard[row][col] = num;
+                updateCell(row, col, num, 'solving');
+                await delay(10);
+
+                if (await solveStep(nextRow, nextCol)) {
+                    return true;
+                }
+
+                tempBoard[row][col] = 0;
+                updateCell(row, col, '', 'backtrack');
+                await delay(10);
+                updateCell(row, col, '', '');
+            }
+        }
+        return false;
     }
     
-    const solution = sudokuSolver.solutionStr(boardString);
-    if (solution) {
-        stringToBoard(solution);
+    const solved = await solveStep(0, 0);
+    if(solved) {
+        messageArea.textContent = "Solution Found!";
+        messageArea.style.color = "var(--valid-glow)";
     } else {
-        alert("No valid solution exists for this Sudoku configuration.");
+        messageArea.textContent = "No solution exists for this configuration.";
+        messageArea.style.color = "var(--error-color)";
     }
-});
+    isSolving = false;
+    setButtonsDisabled(false);
+    solveBtn.disabled = true;
+}
 
-resetbtn.addEventListener("click", clearer);
+// --- 5. Utility & Helper Functions ---
+
+function lockBoard() {
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            const cell = boardElement.rows[i].cells[j];
+            cell.contentEditable = false;
+            if(cell.textContent !== '') {
+                cell.classList.add('given');
+            }
+        }
+    }
+}
+
+function updateCell(row, col, value, className = '') {
+    const cell = boardElement.rows[row].cells[col];
+    cell.textContent = value;
+    cell.className = '';
+    if (className) cell.classList.add(className);
+}
+
+function setButtonsDisabled(disabled) {
+    validateBtn.disabled = disabled;
+    solveBtn.disabled = disabled;
+    resetBtn.disabled = disabled;
+}
+
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+// --- 6. Event Listeners ---
+validateBtn.addEventListener('click', validateInitialBoard);
+solveBtn.addEventListener('click', visualizeSolve);
+resetBtn.addEventListener('click', renderBlankBoard);
+
+// --- Initial Load ---
+document.addEventListener('DOMContentLoaded', renderBlankBoard);
